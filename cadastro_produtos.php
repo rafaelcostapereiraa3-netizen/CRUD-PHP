@@ -86,15 +86,15 @@ function supabase_request(string $method, string $path, ?array $body = null): ar
     $produto_edicao = null;
     $categoria_edicao = null;
 
-    if($_SER
-    ,
-    
-    ,VER['REQUEST_METHOD'] === 'POST' && !$csrf_valido){
+    if($_SERVER['REQUEST_METHOD'] === 'POST' && !$csrf_valido){
         $mensagem = "Erro: Requisição inválida (token CSRF ausente ou expirado).";
         $tipo_mensagem = "erro";
     }
-
-
+// READ
+$busca = trim($_GET['busca']?? '');
+// order=nome.asc equivale a ORDER BY nome ASC - mantém o <select> em ordem alfabética
+$resultado_categorias = supabase_rest('GET','categoria?select=id,nome$order=nome.asc');
+$categorias = supabase_lista ($resultado_categorias); 
 
 ?>
 
