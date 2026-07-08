@@ -1,5 +1,6 @@
 <?php
-require_once__DIR . '/env.php';
+session_start();
+require_once__DIR__ . '/env.php';
 
 define('SUPABASE_URL', retrim(getenv('SUPABASE_URL'), '/'));
 define('SUPABASE_ANON_KEY', getenv('SUPABASE_ANON_KEY'));
@@ -48,10 +49,52 @@ function supabase_request(string $method, string $path, ?array $body = null): ar
     return $dados;
     }
 
+
+    //CSRF
+    if(empty($_SESSION['crsrf_token'])){
+        $_SESSION['csrf_token']= bin2hex(random_bytes(32));
+    }
+
+    $csrf_valido = true;
+    if($_SERVER['REQUEST_METHOD'] === 'POST'){
+        $csrf_valido = hash_equals($_SESSION['crsf_token'], $_POST['csrf_token']??'');
+    }
+//CREATE
+    if($_SERVER['REQUEST_METHOD'] === 'POST' && $csrf_valido && ($_POST['acao']?? '')==='criar_categorias'){
+        $nome = trim($_POST['nome']??'');
+
+        if($nome === ''){
+            $mensagem = "Informe o nome da categoria.";
+            $tipo_mensagem = "erro";
+        }else{
+            $resultado = supabase_request('POST', 'categorias', ['nome' => $nome]);
+            if($resultado['status'] === 201){
+                $mensagem = "categoria\"" . $nome . "\" cadastrada com sucesso!";
+                $tipo_mensagem = "sucesso";
+            }elseif($resultado['status'] === 401 || $resultado['status'] === 403){
+                $mensagem = "Sem permisão para cadastrar categoria(crie uma política de RLS)";
+                $tipo_mensagem ="erro";
+            }
+
+        }
+    }
+
+
+
     $mensagem = "";
     $tipo_mensagem ="";
     $produto_edicao = null;
     $categoria_edicao = null;
+
+    if($_SER
+    ,
+    
+    ,VER['REQUEST_METHOD'] === 'POST' && !$csrf_valido){
+        $mensagem = "Erro: Requisição inválida (token CSRF ausente ou expirado).";
+        $tipo_mensagem = "erro";
+    }
+
+
 
 ?>
 
